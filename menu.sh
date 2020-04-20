@@ -4,6 +4,7 @@ trap '' 2
 export LANG=en_US.UTF-8
 export KUBECONFIG=/kubeconfig
 
+unset LINES COLUMNS
 DIALOG_CANCEL=1
 DIALOG_ESC=255
 HEIGHT=0
