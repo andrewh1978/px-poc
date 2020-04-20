@@ -15,5 +15,5 @@ echo Building container
 docker build -t px-poc . >&/dev/null
 echo
 echo -e ${YELLOW}Run px-poc with:
-echo -e "${WHITE}docker run -it -e LINES=$LINES -e COLUMN=$COLUMNS -v </path/to/kubeconfig>:/kubeconfig --name px-poc --rm px-poc"
+echo -e "${WHITE}docker run -it -e LINES=\$LINES -e COLUMNS=\$COLUMNS -v </path/to/kubeconfig>:/kubeconfig --name px-poc --rm px-poc"
 EOF
