@@ -15,5 +15,5 @@ echo Building container
 docker build -t px-poc . >&/dev/null
 echo
 echo -e ${YELLOW}Run px-poc with:
-echo -e "${WHITE}docker run -it --rm px-poc /px-poc/go.sh"
+echo -e "${WHITE}docker run -it -v </path/to/kubeconfig>:/kubeconfig --name px-poc --rm px-poc"
 EOF
