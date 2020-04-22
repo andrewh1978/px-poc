@@ -101,7 +101,7 @@ test_failover_postgres() {
   tmux split-window -d -t 1 -h "kubectl get pods -w -o wide"
   display_info "Deploy PostgreSQL" "First, we will deploy PostgreSQL"
   display_result "Deploy PostgreSQL" "kubectl apply -f /assets/deploy_postgres.yml"
-  kubectl wait pod -lapp=postgres --for=condition=ready
+  kubectl wait pod -lapp=postgres --for=condition=ready --timeout=120s
   display_info "Get pods" "Now, let's look at the pods to see where PostgreSQL was provisioned"
   display_result "Get pods" "kubectl get pods -lapp=postgres -o wide"
   node=$(kubectl get pods -lapp=postgres -A -o=custom-columns='DATA:spec.nodeName' --no-headers)
@@ -109,7 +109,7 @@ test_failover_postgres() {
   display_result "Cordon node" "kubectl cordon $node"
   display_info "Delete pod" "Now, we can delete the pod and watch it scheduled on another node"
   display_result "Delete pod" "kubectl delete pod -lapp=postgres"
-  kubectl wait pod -lapp=postgres --for=condition=ready
+  kubectl wait pod -lapp=postgres --for=condition=ready --timeout=120s
   display_info "Get pods" "Look at the pods again to see where it has been scheduled"
   display_result "Get pods" "kubectl get pods -lapp=postgres -o wide"
   display_info "Uncordon node" "Uncordon the node"
@@ -125,7 +125,7 @@ test_failover_mysql() {
   tmux split-window -d -t 1 -h "kubectl get pods -w -o wide"
   display_info "Deploy MySQL" "First, we will deploy MySQL"
   display_result "Deploy MySQL" "kubectl apply -f /assets/deploy_mysql.yml"
-  kubectl wait pod -lapp=mysql --for=condition=ready
+  kubectl wait pod -lapp=mysql --for=condition=ready --timeout=120s
   display_info "Get pods" "Now, let's look at the pods to see where MySQL was provisioned"
   display_result "Get pods" "kubectl get pods -lapp=mysql -o wide"
   node=$(kubectl get pods -lapp=mysql -A -o=custom-columns='DATA:spec.nodeName' --no-headers)
@@ -133,7 +133,7 @@ test_failover_mysql() {
   display_result "Cordon node" "kubectl cordon $node"
   display_info "Delete pod" "Now, we can delete the pod and watch it scheduled on another node"
   display_result "Delete pod" "kubectl delete pod -lapp=mysql"
-  kubectl wait pod -lapp=mysql --for=condition=ready
+  kubectl wait pod -lapp=mysql --for=condition=ready --timeout=120s
   display_info "Get pods" "Look at the pods again to see where it has been scheduled"
   display_result "Get pods" "kubectl get pods -lapp=mysql -o wide"
   display_info "Uncordon node" "Uncordon the node"
