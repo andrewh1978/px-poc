@@ -14,13 +14,13 @@ display_result() {
   result=$(eval $2)
   dialog --title "$1" \
     --no-collapse \
-    --msgbox "$result" 0 0
+    --msgbox "$result" $HEIGHT $WIDTH
 }
 
 display_info() {
   dialog --title "$1" \
     --no-collapse \
-    --msgbox "$2" 0 0
+    --msgbox "$2" $HEIGHT $WIDTH
 }
 
 menu_top() {
