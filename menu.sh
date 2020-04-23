@@ -11,6 +11,7 @@ HEIGHT=0
 WIDTH=0
 NC='\033[0m'
 BOLD='\033[1m'
+PXCTL='kubectl exec $(kubectl get pods -n kube-system -lname=portworx -o="jsonpath={.items..metadata.name}" --field-selector=status.phase==Running | cut -f 1 -d " ") -n kube-system -- /opt/pwx/bin/pxctl --color'
 LOG=/log
 echo -ne "$BOLD# ">$LOG
 
@@ -100,8 +101,8 @@ menu_failover() {
 }
 
 create_demo_panes() {
-  tmux split-window -d -h "tail -s 0.1 -f $LOG"
-  tmux split-window -d
+  tmux split-window -d -h "$1"
+  tmux split-window -d "tail -s 0.1 -f $LOG"
 }
 
 destroy_demo_panes() {
@@ -110,7 +111,7 @@ destroy_demo_panes() {
 }
 
 test_failover_postgres() {
-  create_demo_panes
+  create_demo_panes "watch --color $PXCTL status \; kubectl describe pvc -lapp=postgres"
   display_info "Deploy PostgreSQL" "First, we will deploy PostgreSQL"
   run_master "kubectl apply -f /assets/deploy_postgres.yml"
   run_master "kubectl wait pod -lapp=postgres --for=condition=ready --timeout=120s"
@@ -132,7 +133,7 @@ test_failover_postgres() {
 }
 
 test_failover_mysql() {
-  create_demo_panes
+  create_demo_panes "watch --color $PXCTL status \; kubectl describe pvc -lapp=mysql"
   display_info "Deploy MySQL" "First, we will deploy MySQL"
   run_master "kubectl apply -f /assets/deploy_mysql.yml"
   run_master "kubectl wait pod -lapp=mysql --for=condition=ready --timeout=120s"
