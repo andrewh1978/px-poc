@@ -23,6 +23,7 @@ display_info() {
 
 run_master() {
   echo -e "$1$NC" >>$LOG
+  dialog --title "Please wait" --infobox "" $HEIGHT $WIDTH
   eval $1 >>$LOG 2>&1
   echo -ne "$BOLD# ">>$LOG
 }
@@ -70,8 +71,8 @@ menu_failover() {
       --clear \
       --cancel-label "Exit" \
       --menu "" $HEIGHT $WIDTH 4 \
-      "1" "PostgreSQL" \
-      "2" "MySQL" \
+      "1" "PostgreSQL (vertical)" \
+      "2" "MySQL (horizontal)" \
       2>&1 1>&3)
     exit_status=$?
     exec 3>&-
@@ -100,9 +101,14 @@ menu_failover() {
   done
 }
 
-create_demo_panes() {
+create_demo_panes_vertical() {
   tmux split-window -d -h "$1"
   tmux split-window -d "tail -s 0.1 -f $LOG"
+}
+
+create_demo_panes_horizontal() {
+  tmux split-window -d "$1"
+  tmux split-window -d -h "tail -s 0.1 -f $LOG"
 }
 
 destroy_demo_panes() {
@@ -111,7 +117,7 @@ destroy_demo_panes() {
 }
 
 test_failover_postgres() {
-  create_demo_panes "watch --color $PXCTL status \; kubectl describe pvc -lapp=postgres"
+  create_demo_panes_vertical "watch --color $PXCTL status \; kubectl describe pvc -lapp=postgres"
   display_info "Deploy PostgreSQL" "First, we will deploy PostgreSQL"
   run_master "kubectl apply -f /assets/deploy_postgres.yml"
   run_master "kubectl wait pod -lapp=postgres --for=condition=ready --timeout=120s"
@@ -133,7 +139,7 @@ test_failover_postgres() {
 }
 
 test_failover_mysql() {
-  create_demo_panes "watch --color $PXCTL status \; kubectl describe pvc -lapp=mysql"
+  create_demo_panes_horizontal "watch --color $PXCTL status \; kubectl describe pvc -lapp=mysql"
   display_info "Deploy MySQL" "First, we will deploy MySQL"
   run_master "kubectl apply -f /assets/deploy_mysql.yml"
   run_master "kubectl wait pod -lapp=mysql --for=condition=ready --timeout=120s"
