@@ -28,15 +28,32 @@ run_master() {
   echo -ne "$BOLD# ">>$LOG
 }
 
-menu_top() {
+menu_print() {
+  # First parameter is the name of this menu
+  # Second parameter is name of first menu option
+  # Third parameter is name of function to be called for first option
+  # Fourth parameter is name of second menu option
+  # Fifth parmeter is name of function to be called for second option
+  # etc
+  title=$1
+  shift
+  declare -a dialog_params
+  functions=("")
+  i=1
+  while [ "$#" -gt 0 ]; do
+    functions+=($2)
+    dialog_params+=($i "$(echo $1 | sed 's/ /\ /g')")
+    i=$[$i+1]
+    shift 2
+  done
   while true; do
     exec 3>&1
     selection=$(dialog \
-      --title "Menu" \
+      --title "$title" \
       --clear \
       --cancel-label "Exit" \
       --menu "" $HEIGHT $WIDTH 4 \
-      "1" "Failover" \
+      "${dialog_params[@]}" \
       2>&1 1>&3)
     exit_status=$?
     exec 3>&-
@@ -51,54 +68,19 @@ menu_top() {
         break
         ;;
     esac
-    case $selection in
-      0 )
-        clear
-        echo "Program terminated."
-        ;;
-      1 )
-        menu_failover
-        ;;
-    esac
+    [ $selection == 0 ] && clear && echo "Program terminated."
+    ${functions[$selection]}
   done
 }
 
+menu_top() {
+  menu_print "Menu" "Failover" menu_failover
+}
+
 menu_failover() {
-  while true; do
-    exec 3>&1
-    selection=$(dialog \
-      --title "Failover" \
-      --clear \
-      --cancel-label "Exit" \
-      --menu "" $HEIGHT $WIDTH 4 \
-      "1" "PostgreSQL (vertical)" \
-      "2" "MySQL (horizontal)" \
-      2>&1 1>&3)
-    exit_status=$?
-    exec 3>&-
-    case $exit_status in
-      $DIALOG_CANCEL)
-        break
-        ;;
-      $DIALOG_ESC)
-        clear
-        echo "Program aborted." >&2
-        break
-        ;;
-    esac
-    case $selection in
-      0 )
-        clear
-        echo "Program terminated."
-        ;;
-      1 )
-        test_failover_postgres
-        ;;
-      2 )
-        test_failover_mysql
-        ;;
-    esac
-  done
+  menu_print "Failover" \
+    "PostgreSQL (vertical)" test_failover_postgres \
+    "MySQL (horizontal)" test_failover_mysql
 }
 
 create_demo_panes_vertical() {
